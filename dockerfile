@@ -17,13 +17,26 @@ RUN apt-get update && \
 # =========================
 WORKDIR /opt/kaldi/egs/thchs30/s5
 
+# 下载 THCHS30 数据集
+RUN mkdir -p /data/thchs30 && \
+    cd /data/thchs30 && \
+    wget -q http://www.openslr.org/resources/18/data_thchs30.tgz && \
+    tar -xzf data_thchs30.tgz && \
+    rm data_thchs30.tgz && \
+    wget -q http://www.openslr.org/resources/18/resource.tgz && \
+    tar -xzf resource.tgz && \
+    rm resource.tgz
+
+# 修改数据路径
+RUN sed -i 's|thchs=/nfs/public/materials/data/thchs30-openslr|thchs=/data/thchs30|g' run.sh
+
 # 只跑到 mono
 RUN sed -i 's/^.*tri1/#&/' run.sh && \
     sed -i 's/^.*tri2/#&/' run.sh && \
     sed -i 's/^.*tri3/#&/' run.sh && \
     sed -i 's/^.*chain/#&/' run.sh && \
+    chmod +x run.sh && \
     ./run.sh
-
 # =========================
 # 3. 复制 Python 应用文件
 # =========================
