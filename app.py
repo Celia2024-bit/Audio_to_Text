@@ -6,7 +6,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from phonemes import kaldi_raw_to_pinyin
 
-KALDI_ROOT = "/opt/kaldi/egs/aishell/s5"
+KALDI_ROOT = "/opt/kaldi/egs/thchs30"
 DATA_DIR = f"{KALDI_ROOT}/data/test"
 WAV_DIR = f"{DATA_DIR}/wav"
 EXP_DIR = f"{KALDI_ROOT}/exp"

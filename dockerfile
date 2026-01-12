@@ -15,25 +15,15 @@ RUN apt-get update && \
 # =========================
 # 2. Kaldi + Aishell（一次性）
 # =========================
-WORKDIR /opt/kaldi/egs/aishell/s5
-RUN ./run.sh
+WORKDIR /opt/kaldi/egs
 
-# =========================
-# 3. Demo 自检（build 阶段验证）
-# =========================
-RUN echo "===== DEMO CHECK: Building feature pipeline =====" && \
-    echo "demo /opt/kaldi/egs/aishell/s5/data/test/wav/test.wav" > data/test/wav.scp && \
-    echo "demo demo" > data/test/utt2spk && \
-    echo "demo demo" > data/test/spk2utt && \
-    echo "===== Extracting MFCC features =====" && \
-    steps/make_mfcc.sh --nj 1 data/test exp/make_mfcc/test mfcc && \
-    echo "===== Computing CMVN stats =====" && \
-    steps/compute_cmvn_stats.sh data/test exp/make_mfcc/test mfcc && \
-    echo "===== Running alignment =====" && \
-    steps/align_si.sh --nj 1 data/test exp/mono exp/mono_ali && \
-    echo "===== Extracting phoneme alignment =====" && \
-    ali-to-phones exp/mono_ali/final.mdl ark:"gunzip -c exp/mono_ali/ali.1.gz|" ark,t:- | head -n 20 && \
-    echo "===== DEMO CHECK PASSED ====="
+RUN wget -O thchs30_gmm.tgz https://kaldi-asr.org/models/3/0003_thchs30_gmm.tgz && \
+    tar -xzf thchs30_gmm.tgz && \
+    rm thchs30_gmm.tgz
+
+# 解压后目录是：0003_thchs30_gmm
+# 我们把它软链成 thchs30，方便路径统一
+RUN ln -s /opt/kaldi/egs/0003_thchs30_gmm /opt/kaldi/egs/thchs30
 
 # =========================
 # 3. 复制 Python 应用文件
