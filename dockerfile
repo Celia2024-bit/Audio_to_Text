@@ -15,15 +15,14 @@ RUN apt-get update && \
 # =========================
 # 2. Kaldi + Aishell（一次性）
 # =========================
-WORKDIR /opt/kaldi/egs
+WORKDIR /opt/kaldi/egs/thchs30/s5
 
-RUN wget -O thchs30_gmm.tgz https://kaldi-asr.org/models/3/0003_thchs30_gmm.tgz && \
-    tar -xzf thchs30_gmm.tgz && \
-    rm thchs30_gmm.tgz
-
-# 解压后目录是：0003_thchs30_gmm
-# 我们把它软链成 thchs30，方便路径统一
-RUN ln -s /opt/kaldi/egs/0003_thchs30_gmm /opt/kaldi/egs/thchs30
+# 只跑到 mono
+RUN sed -i 's/^.*tri1/#&/' run.sh && \
+    sed -i 's/^.*tri2/#&/' run.sh && \
+    sed -i 's/^.*tri3/#&/' run.sh && \
+    sed -i 's/^.*chain/#&/' run.sh && \
+    ./run.sh
 
 # =========================
 # 3. 复制 Python 应用文件
