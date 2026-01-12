@@ -1,4 +1,4 @@
-FROM kaldi/kaldi:latest
+FROM kaldiasr/kaldi:latest
 
 # =========================
 # 1. 设置工作目录
