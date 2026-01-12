@@ -25,7 +25,9 @@ COPY requirements.txt /app/requirements.txt
 # =========================
 # 4. 安装 Python 依赖
 # =========================
-RUN pip3 install --no-cache-dir -r /app/requirements.txt
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # =========================
 # 5. 复制 Kaldi 相关脚本和配置
