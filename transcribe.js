@@ -4,6 +4,8 @@
 async function processAndCompare(audioFile, targetText) {
     // 确保使用远程服务器的地址
     const API_URL = "https://audio-to-text-29330024195.europe-west2.run.app/pinyin";
+    // docker run -it -p 39999:10000 my_pinyin_service:v1 /bin/bash
+     // const API_URL = "http://localhost:39999/pinyin";
 
     try {
         // --- 第一部分：处理文本转拼音 (前端逻辑) ---
