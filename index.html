@@ -1,60 +1,53 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>语音拼音比对工具</title>
+    <title>Pinyin Comparison Tool</title>
     <script src="https://unpkg.com/pinyin-pro"></script>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; background-color: #f4f7f6; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 40px auto; background-color: #f0f2f5; color: #333; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
         .input-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; }
-        input[type="text"], input[type="file"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { background-color: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
-        button:hover { background-color: #45a049; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #218838; }
         button:disabled { background-color: #ccc; }
-
         #resultContainer { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 15px; }
-        .char-card { border: 2px solid #eee; border-radius: 8px; padding: 15px; text-align: center; min-width: 80px; background: #fff; }
-        .char-card.correct { border-color: #4CAF50; background-color: #e8f5e9; }
-        .char-card.incorrect { border-color: #f44336; background-color: #ffebee; }
-        
-        .char-card .hanzi { font-size: 24px; font-weight: bold; display: block; }
-        .char-card .pinyin-label { font-size: 12px; color: #666; margin-top: 5px; }
-        .char-card .pinyin-val { font-family: monospace; font-size: 14px; display: block; }
-        
-        #loading { display: none; color: #666; font-style: italic; }
+        .char-card { border: 2px solid #eee; border-radius: 10px; padding: 15px; text-align: center; min-width: 100px; background: #fff; transition: 0.2s; }
+        .char-card.correct { border-color: #28a745; background-color: #f6ffed; }
+        .char-card.incorrect { border-color: #ff4d4f; background-color: #fff1f0; }
+        .hanzi { font-size: 32px; font-weight: bold; display: block; margin-bottom: 5px; }
+        .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; color: white; margin: 2px; display: inline-block; }
+        #loading { display: none; margin-left: 10px; color: #666; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>拼音比对测试</h2>
+    <h2>Pinyin Assessment</h2>
     
     <div class="input-group">
-        <label>1. 输入目标文本：</label>
-        <input type="text" id="targetText" placeholder="例如：你好" value="你好">
+        <label>1. Target Text:</label>
+        <input type="text" id="targetText" value="你好世界">
     </div>
 
     <div class="input-group">
-        <label>2. 选择音频文件：</label>
+        <label>2. Audio File:</label>
         <input type="file" id="audioFile" accept="audio/*">
     </div>
 
-    <button id="startBtn">开始对比</button>
-    <span id="loading"> 正在处理，请稍候...</span>
+    <button id="startBtn">Analyze Now</button>
+    <span id="loading">Processing...</span>
 
-    <hr>
+    <hr style="border:0; border-top:1px solid #eee; margin:25px 0;">
 
-    <h3>比对结果：</h3>
-    <div id="resultContainer">
-        </div>
+    <h3>Results:</h3>
+    <div id="resultContainer"></div>
 </div>
 
 <script src="transcribe.js"></script>
-
 <script>
     const startBtn = document.getElementById('startBtn');
     const loading = document.getElementById('loading');
@@ -65,23 +58,19 @@
         const file = document.getElementById('audioFile').files[0];
 
         if (!text || !file) {
-            alert("请确保已输入文本并上传音频文件！");
+            alert("Please enter text and upload an audio file!");
             return;
         }
 
-        // 界面状态处理
         startBtn.disabled = true;
         loading.style.display = 'inline';
         resultContainer.innerHTML = '';
 
         try {
-            // 调用 transcribe.js 中的函数
             const results = await processAndCompare(file, text);
-            
-            // 渲染结果
             renderResults(results);
         } catch (error) {
-            alert("请求失败，请检查后端服务是否开启：" + error.message);
+            alert("Error: " + error.message);
         } finally {
             startBtn.disabled = false;
             loading.style.display = 'none';
@@ -89,27 +78,32 @@
     });
 
     function renderResults(data) {
-        if (!data || data.length === 0) {
-            resultContainer.innerHTML = '<p>无比对数据</p>';
-            return;
-        }
-
         data.forEach(item => {
             const card = document.createElement('div');
             card.className = `char-card ${item.isCorrect ? 'correct' : 'incorrect'}`;
             
+            let badges = '';
+            if (item.isCorrect) {
+                badges = '<span style="color:#52c41a; font-size:12px;">Perfect!</span>';
+            } else if (item.actual === "--") {
+                badges = '<span style="color:#999; font-size:12px;">No Audio</span>';
+            } else {
+                if (!item.diff.initialMatch) badges += '<span class="badge" style="background:#ff4d4f">Initial Error</span>';
+                if (!item.diff.finalMatch) badges += '<span class="badge" style="background:#faad14">Final Error</span>';
+                if (!item.diff.toneMatch) badges += '<span class="badge" style="background:#1890ff">Tone Error</span>';
+            }
+
             card.innerHTML = `
                 <span class="hanzi">${item.char}</span>
-                <div class="pinyin-label">预期</div>
-                <span class="pinyin-val">${item.expected}</span>
-                <div class="pinyin-label">识别</div>
-                <span class="pinyin-val">${item.actual || '--'}</span>
+                <div style="font-size:11px; color:#666;">Target: ${item.expected}</div>
+                <div style="font-size:14px; font-weight:bold; color:${item.isCorrect ? '#52c41a' : '#ff4d4f'}">
+                    You: ${item.actual}
+                </div>
+                <div style="margin-top:10px; min-height:20px;">${badges}</div>
             `;
-            
             resultContainer.appendChild(card);
         });
     }
 </script>
-
 </body>
 </html>
