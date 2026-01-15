@@ -2,8 +2,18 @@ import subprocess
 import os
 import json
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware 
 
 app = FastAPI()
+
+# 2. 配置允许跨域
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],             # 允许所有域名访问
+    allow_credentials=True,
+    allow_methods=["*"],             # 允许所有请求方法 (POST, GET 等)
+    allow_headers=["*"],             # 允许所有请求头
+)
 
 @app.post("/pinyin")
 async def get_pinyin(file: UploadFile = File(...)):
